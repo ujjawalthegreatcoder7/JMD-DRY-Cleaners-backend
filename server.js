@@ -11,10 +11,12 @@ app.use(cors());
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // 465 ke liye true hota, 587 ke liye false
   auth: {
-    user: "ujjuarora5@gmail.com",
-    pass: "aivhasspbhprtbuw",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -32,12 +34,12 @@ app.post("/book-now", async (req, res) => {
     } = req.body;
 
     await transporter.sendMail({
-      from: "ujjuarora5@gmail.com",
-      to: "ujjuarora5@gmail.com",
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
       subject: "New Dry Cleaning Booking",
       html: `
         <h2>New Booking Received</h2>
-
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Phone:</strong> ${phone}</p>
         <p><strong>Email:</strong> ${email}</p>
@@ -49,23 +51,22 @@ app.post("/book-now", async (req, res) => {
       `,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Booking sent successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error("BOOKING ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to send booking. Please try again.",
+      error: error.message,
     });
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// ujjuarora5@gmail.com
-// aivhasspbhprtbuw
