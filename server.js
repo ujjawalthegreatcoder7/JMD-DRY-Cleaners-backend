@@ -24,6 +24,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 app.get("/", (req, res) => {
@@ -41,7 +44,7 @@ app.post("/book-now", async (req, res) => {
       phone,
       email,
       address,
-      guests,
+      sofas,
       date,
       time,
       specialRequest,
@@ -53,17 +56,13 @@ app.post("/book-now", async (req, res) => {
       phone,
       email,
       address,
-      guests,
+      sofas,
       date,
       time,
       specialRequest,
     });
 
-    console.log("Step 2: Verifying transporter...");
-    await transporter.verify();
-    console.log("Step 2 DONE: Transporter verified");
-
-    console.log("Step 3: Trying to send email...");
+    console.log("Step 2: Trying to send email directly...");
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -76,17 +75,15 @@ app.post("/book-now", async (req, res) => {
         <p><strong>Phone:</strong> ${phone}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Address:</strong> ${address}</p>
-        <p><strong>Guests:</strong> ${guests}</p>
+        <p><strong>Number of Sofas:</strong> ${sofas}</p>
         <p><strong>Date:</strong> ${date}</p>
         <p><strong>Time:</strong> ${time}</p>
         <p><strong>Special Request:</strong> ${specialRequest}</p>
       `,
     });
 
-    console.log("Step 3 DONE: Email sent successfully");
+    console.log("Step 2 DONE: Email sent successfully");
     console.log("Mail response info:", info);
-
-    console.log("Step 4: Sending success response to frontend");
 
     return res.status(200).json({
       success: true,
